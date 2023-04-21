@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:yupo_daktari/pages/home_screen.dart';
+import 'package:yupo_daktari/pages/login_page.dart';
 import 'package:yupo_daktari/utils/constants.dart';
+import 'package:yupo_daktari/utils/services/auth_service.dart';
+
+import '../utils/helper_functions.dart';
+import '../utils/widgets.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({Key? key}) : super(key: key);
@@ -12,7 +17,13 @@ class SignUpPage extends StatefulWidget {
 class _SignUpPageState extends State<SignUpPage> {
   TextEditingController passwordController = TextEditingController();
   TextEditingController emailController = TextEditingController();
-  TextEditingController userNameController = TextEditingController();
+  TextEditingController fullNameController = TextEditingController();
+  TextEditingController phoneNumberController = TextEditingController();
+  TextEditingController speacilityController = TextEditingController();
+
+  bool _isLoading = false;
+  final formKey = GlobalKey<FormState>();
+  AuthService authService = AuthService();
 
   @override
   Widget build(BuildContext context) {
@@ -56,33 +67,74 @@ class _SignUpPageState extends State<SignUpPage> {
                 MediaQuery.of(context).size.width * 0.1,
                 0
               ),
-              child: Column(
-                children: <Widget>[
-                  logoWidget("assets/images/logo.png"),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SizedBox(height:30,
-                      child: loginSignupField("Enter UserName", Icons.person, false, userNameController)),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SizedBox(height:30,
-                      child: loginSignupField("Enter Email Id", Icons.person, false, emailController)),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  SizedBox(height:30,
-                      child: loginSignupField("Enter Password", Icons.lock, true, passwordController)),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  loginInSignUpButton(context, false, () {
+              child: Form(
+                key: formKey,
+                child: Column(
+                  children: <Widget>[
+                    logoWidget("assets/images/logo.png"),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(height:30,
+                        child: loginSignupField("Enter FullName", Icons.person, false, fullNameController)),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(height:30,
+                        child: loginSignupField("Enter Email Id", Icons.email, false, emailController)),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(height:30,
+                        child: loginSignupField("Enter Phone Number", Icons.phone, false, phoneNumberController)),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(height:30,
+                        child: loginSignupField("Speciality", Icons.work, false, speacilityController)),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    SizedBox(height:30,
+                        child: loginSignupField("Enter Password", Icons.lock, true, passwordController)),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    loginInSignUpButton(context, false, () async {
+                      if (formKey.currentState!.validate()){
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        await authService.registerUserWithEmailandPassword(
+                            fullNameController.text,
+                            emailController.text,
+                            passwordController.text,
+                            speacilityController.text,
+                            passwordController.text).then((value) async {
+                          if(value == true){
+                            //saving shared preferences
+                            await HelperFunction.saveUserLoggedInStatus(true);
+                            await HelperFunction.saveUserEmailSF(emailController.text);
+                            await HelperFunction.saveUserNameSF(fullNameController.text);
+                            nextScreenReplacement(context, const HomePage());
+                          } else {
+                            showSnackBar(context, Colors.red, value);
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+                        });
+                      }
 
-                      Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
+                        //Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage()));
 
-                  })
-                ],
+                    }),
+                    loginOption(),
+                    const SizedBox(
+                      height:10,
+                    ),
+                  ],
+                ),
               ),
             )
 
@@ -90,4 +142,28 @@ class _SignUpPageState extends State<SignUpPage> {
       ),
     );
   }
+
+  Row loginOption() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text("Have an Account?",
+          style: TextStyle(
+              color: Constants().accentColor
+              //fontW
+          ),
+        ),
+        GestureDetector(
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginPage()));
+          },
+          child: Text("Log In",
+            style: TextStyle(color: Constants().primaryG2,
+                fontWeight: FontWeight.bold),
+          ),
+        )
+      ],
+    );
+  }
+
 }

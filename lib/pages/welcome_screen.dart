@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:yupo_daktari/pages/home_screen.dart';
 import 'package:yupo_daktari/pages/login_page.dart';
 import 'package:yupo_daktari/utils/constants.dart';
 
@@ -30,7 +31,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         child: SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.fromLTRB(20,
-                MediaQuery.of(context).size.height * 0.2,
+                MediaQuery.of(context).size.height * 0.1,
                 20, 0),
             child: Column(
               children: <Widget>[
@@ -58,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(
                       builder: (context) {
-                        return const LoginPage();
+                        return const HomePage();
                       }
                     ));
                   },
@@ -73,6 +74,31 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                         "Get Started",
                         style: TextStyle(
                           color: Constants().secondaryColor,
+                          fontWeight: FontWeight.bold,
+
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
+                InkWell(
+                  onTap: () {
+                    Navigator.push(context, MaterialPageRoute(
+                        builder: (context) {
+                          return const LoginPage();
+                        }
+                    ));
+                  },
+                  child: Container(
+                    height: 20,
+
+                    child:  Center(
+                      child:  Text(
+                        "Sign Up / Login as a Doctor",
+                        style: TextStyle(
+                          decoration: TextDecoration.underline,
+                          color: Constants().primaryG1,
                           fontWeight: FontWeight.bold,
 
                         ),

@@ -7,6 +7,13 @@ class Constants{
   final primaryG1 = hexStringToColor("15006D");
   final primaryG2 = hexStringToColor("03254B");
   final primaryG3 = hexStringToColor("D8E9F7");
+
+  static String appId = "1:1031503962590:web:96494ecba4eea7f6cc7d4f";
+  static String apiKey = "AIzaSyDNRwFHVa6qLHjZAz6jSTGp4QnTMBpSJhA";
+  static String messagingSenderId = "1031503962590";
+  static String projectId = "yupo-daktari";
+
+
 }
 
 hexStringToColor(String hexColor) {
@@ -47,7 +54,7 @@ TextField loginSignupField(String text, IconData icon, bool isPasswordType, Text
       ),
       labelText: text,
       labelStyle: TextStyle(
-        color: Constants().secondaryColor.withOpacity(0.9),
+        color: Constants().secondaryColor.withOpacity(0.5),
       ),
       filled: true,
       floatingLabelBehavior: FloatingLabelBehavior.never,
