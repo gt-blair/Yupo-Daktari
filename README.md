@@ -4,3 +4,5 @@ Translated from swahili to mean
 Mobile application intended to help patients have ease of access to medical specialists.  
 
 Further versions will intend on making the site more interactive and have more embeded features
+
+Configure firebase firestore and firebase authentication (email/password)
