@@ -59,7 +59,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(
                       builder: (context) {
-                        return const HomePage();
+                        return const LoginPage();
                       }
                     ));
                   },
@@ -82,30 +82,6 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   ),
                 ),
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05,),
-                InkWell(
-                  onTap: () {
-                    Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return const LoginPage();
-                        }
-                    ));
-                  },
-                  child: Container(
-                    height: 20,
-
-                    child:  Center(
-                      child:  Text(
-                        "Sign Up / Login as a Doctor",
-                        style: TextStyle(
-                          decoration: TextDecoration.underline,
-                          color: Constants().primaryG1,
-                          fontWeight: FontWeight.bold,
-
-                        ),
-                      ),
-                    ),
-                  ),
-                )
               ],
             ),
           ),

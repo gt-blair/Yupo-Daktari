@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DatabaseService {
@@ -20,6 +18,7 @@ class DatabaseService {
       "profilePic" : "",
       "phoneNumber" : phoneNumber,
       "uid" : uid,
+      "groups":[]
     });
     //0705371846
   }
@@ -52,12 +51,15 @@ class DatabaseService {
       "groupId" : groupDocumentReference.id,
     });
 
+    //Update the user's group value
     DocumentReference userDocumentReference = userCollection.doc(uid);
     return await userDocumentReference.update({
       "groups": FieldValue.arrayUnion(["${groupDocumentReference.id}_${groupName}"])
     });
 
   }
+
+
   //getting the chats
   getChats(String groupId) async{
     return groupCollection
@@ -67,6 +69,8 @@ class DatabaseService {
         .snapshots();
   }
 
+
+  //get group Admin
   Future getGroupAdmin(String groupId) async {
     DocumentReference d = groupCollection.doc(groupId);
     DocumentSnapshot documentSnapshot = await d.get();

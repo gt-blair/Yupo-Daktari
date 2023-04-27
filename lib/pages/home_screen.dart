@@ -1,7 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:yupo_daktari/pages/login_page.dart';
-import 'package:yupo_daktari/utils/specialist_item.dart';
-import 'package:yupo_daktari/utils/doctor_item.dart';
+
+import '../utils/group_tile.dart';
+import '../utils/helper_functions.dart';
+import '../utils/profile_page.dart';
+import '../utils/search_page.dart';
+import '../utils/services/auth_service.dart';
+import '../utils/services/database_service.dart';
+import '../utils/widgets.dart';
+import 'login_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,256 +18,329 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String userName = "";
+  String email = "";
+  AuthService authService = AuthService();
+  Stream? groups; //be changed to users
+  bool _isLoading = false;
+  String groupName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    gettingUserData(); //check the email and username
+  }
+
+  //string manipulation
+  String getId(String res){
+    return res.substring(0, res.indexOf("_"));
+  }
+
+  String getName(String res){
+    return res.substring(res.indexOf("_")+1);
+  }
+
+  gettingUserData() async {
+    await HelperFunction.getUserEmailFromSF().then((value){ //sets current user email
+      setState(() {
+        email = value!;
+
+      });
+    });
+
+    await HelperFunction.getUserNameFromSF().then((val){ //sets current user name
+      setState(() {
+        userName = val!;
+      });
+    });
+
+    await DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid).getUserGroups().then((snapshot){ //get user groups
+      setState(() {
+        groups = snapshot;
+      });
+    });
+
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      bottomNavigationBar: BottomNavigationBar(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            onPressed: () {
+              nextScreen(context, SearchPage());
 
-        type: BottomNavigationBarType.fixed,
-        iconSize: 20,
-        items: const [
-          BottomNavigationBarItem(
-              icon: Icon(
-                Icons.home_outlined,
-                color: Colors.black54,
-              ),
-              label: ''
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.calendar_month_outlined,
-              color: Colors.black54,
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.chat_bubble_outline,
-              color: Colors.black54,
-            ),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(
-              Icons.notifications_none_outlined,
-              color: Colors.black54,
-            ),
-            label: '',
+            },
+            icon: const Icon(Icons.search,),
           ),
         ],
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: [
-              const SizedBox(height: 12,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        "Hello",
-                        style: TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16
-                        ),
-                      ),
-                      SizedBox(
-                        height: 4,
-                      ),
-                      Text(
-                        "Maple Caramel",
-                        style: TextStyle(
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20
-                        ),
-                      )
-                    ],
-                  ),
-                  const CircleAvatar(
-                    radius: 25,
-                    backgroundColor: Colors.grey,
-                    child: CircleAvatar(
-                      radius: 23,
-                      backgroundImage: AssetImage("assets/images/pm.png"),
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 30,
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 16
-                ),
-                decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 223, 200, 228),
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Image.asset(
-                      "assets/images/surgeon.png",
-                      width: 40,
-                      height: 50,
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "How do you feel?",
-                          style: TextStyle(
-                              color: Colors.black87,
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold
-                          ),
-
-                        ),
-                        const SizedBox(height: 2,),
-                        const SizedBox(
-                          width: 120,
-                          child: Text(
-                            "Fill out your Medical right now",
-                            style: TextStyle(
-                                color: Colors.black87,
-                                fontSize: 12
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 2,),
-                        Container(
-                          width: 120,
-                          height: 20,
-                          padding: const EdgeInsets.all(2.0),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "Get Started",
-                              style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 12
-                              ),
-                            ),
-                          ),
-                        )
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 5,),
-              Container(
-                padding: const EdgeInsets.only(left: 16),
-                height: 32,
-                decoration: BoxDecoration(
-                    color: const Color.fromARGB(95, 179, 173, 173),
-                    borderRadius: BorderRadius.circular(10)
-                ),
-                child: Row(
-                  children: const [
-                    Icon(
-                      Icons.search,
-                      size: 16,
-                      color: Colors.black54,
-                    ),
-                    SizedBox(width: 6,),
-                    Text(
-                      "How can we help you?",
-                      style: TextStyle(
-                          color: Colors.black54,
-                          fontSize: 10
-                      ),
-                    )
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10,),
-              SizedBox(
-                height: 40,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: [
-                    SpecialistItem(
-                        imagePath: "assets/images/clean.png",
-                        imageName: "Dentist"),
-                    SizedBox(width: 4,),
-                    SpecialistItem(
-                        imagePath: "assets/images/knife.png",
-                        imageName: "Surgeon"
-                    ),
-                    SizedBox(width: 4,),
-                    SpecialistItem(
-                        imagePath: "assets/images/lungs.png",
-                        imageName: "Therapy"
-                    ),
-                    SizedBox(width: 4,),
-                    SpecialistItem(
-                        imagePath: "assets/images/hormones.png",
-                        imageName: "Physiologist"
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
-                  Text(
-                    "Doctor list",
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12
-                    ),
-                  ),
-                  Text(
-                    "See all",
-                    style: TextStyle(
-                        color: Colors.black54,
-                        fontSize: 12
-                    ),
-                  )
-                ],
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              SizedBox(
-                height: 120,
-                child: ListView(
-                  scrollDirection: Axis.horizontal,
-                  children: const [
-                    DoctorItem(
-                        image: "assets/images/1.png",
-                        name: "Nycta Gina",
-                        specialist: "Pedetrician"),
-                    DoctorItem(
-                        image: "assets/images/3.png",
-                        name: "Reisa Broto Asmoro",
-                        specialist: "Surgeon"),
-                    DoctorItem(
-                        image: "assets/images/2.png",
-                        name: "Indah Kusumaningrum",
-                        specialist: "Odontologist"),
-                  ],
-                ),
-              )
-            ],
+        centerTitle: true,
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        title: const Text(
+          "Doc Forums",
+          style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 27
           ),
         ),
       ),
+      drawer: Drawer(
+        child: ListView(
+          padding: const EdgeInsets.symmetric(vertical: 50),
+          children: <Widget>[
+            Icon(
+              Icons.account_circle,
+              size: 150,
+              color: Colors.grey[700],
+            ),
+            const SizedBox(height: 15,),
+            Text(
+              userName,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                  fontWeight: FontWeight.bold
+              ),
+            ),
+            const SizedBox(height: 30,),
+            const Divider(height: 2,),
+            ListTile(
+              onTap: (){},
+              selectedColor: Theme.of(context).primaryColor,
+              selected: true,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              leading: const Icon(Icons.group),
+              title: const Text(
+                "Doc Forums",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ListTile(
+              onTap: (){
+                nextScreenReplacement(
+                    context,
+                    ProfilePage(email: email, userName: userName)
+                );
+              },
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              leading: const Icon(Icons.group),
+              title: const Text(
+                "Profile",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+            ListTile(
+              onTap: () async {
+                showDialog(
+                    barrierDismissible: false,
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: Text("Logout"),
+                        content: Text("Join Us Again Anytime, Confirm to Exit"),
+                        actions: [
+                          IconButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            icon: const Icon(
+                              Icons.cancel,
+                              color: Colors.red,
+                            ),
+                          ),
 
-    );  }
+                          IconButton(
+                            onPressed: () async {
+                              await authService.signOut();
+                              Navigator.of(context).pushAndRemoveUntil(MaterialPageRoute(builder: (context) => const LoginPage()),
+                                      (route) => false);
+                            },
+                            icon: const Icon(
+                              Icons.done,
+                              color: Colors.green,
+                            ),
+                          ),
+
+                        ],
+
+                      );
+                    }
+                );
+                /*authService.signOut().whenComplete(() {
+                  nextScreenReplacement(context, const LoginPage());
+                });*/
+              },
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              leading: const Icon(Icons.exit_to_app),
+              title: const Text(
+                "Log Out",
+                style: TextStyle(color: Colors.black),
+              ),
+            ),
+          ],
+        ),
+      ),
+      body: groupList(),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          popUpDialog(context);
+        },
+        elevation: 0,
+        backgroundColor: Theme.of(context).primaryColor,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
+          size: 30,
+        ),
+      ) ,
+
+    );
+  }
+
+  popUpDialog(BuildContext context) {
+    showDialog(
+        barrierDismissible: false,
+        context: context,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: ((context, setState) {
+              return AlertDialog(
+                title: const Text("Create a group/forum",
+                  textAlign: TextAlign.left,
+                ),
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _isLoading == true ? Center(
+                      child: CircularProgressIndicator(color: Theme.of(context).primaryColor,) ,
+                    ) : TextField(
+                      onChanged: (val) {
+                        setState(() {
+                          groupName = val;
+                        });
+                      },
+                      style: const TextStyle(
+                        color: Colors.black,
+                      ),
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                        errorBorder: OutlineInputBorder(
+                            borderSide: const BorderSide(color: Colors.red),
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: Theme.of(context).primaryColor),
+                            borderRadius: BorderRadius.circular(20)
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+                actions: [
+                  ElevatedButton(
+                    onPressed: (){
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text(
+                        "Cancel"
+                    ),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () async {
+                      if(groupName!=""){
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        DatabaseService(uid: FirebaseAuth.instance.currentUser!.uid).createGroup(
+                            userName,
+                            FirebaseAuth.instance.currentUser!.uid,
+                            groupName).whenComplete(() {
+                          _isLoading = false;
+                        });
+                        Navigator.of(context).pop();
+                        showSnackBar(context, Colors.green, "Group Created Successfuly");
+                      }
+                    },
+                    child: const Text(
+                        "Create"
+                    ),
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).primaryColor
+                    ),
+                  ),
+                ],
+              );
+            }),
+          );
+        }
+    );
+  }
+
+  groupList() {
+    return StreamBuilder(
+      stream: groups,
+      builder: (context, AsyncSnapshot snapshot){
+        if(snapshot.hasData){
+          if(snapshot.data['groups'] != null) {
+            if(snapshot.data['groups'].length != 0) {
+              return ListView.builder(
+                itemCount: snapshot.data['groups'].length,
+                itemBuilder: (context, index) {
+                  int reverseIndex = snapshot.data["groups"].length - index -1;
+                  return GroupTile(
+                    groupId: getId(snapshot.data["groups"][reverseIndex]),
+                    groupName: getName(snapshot.data["groups"][reverseIndex]),
+                    username: snapshot.data['fullName'],
+                  );
+                },
+              );
+            }else{
+              return noGroupWidget();
+            }
+          }else{
+            return noGroupWidget();
+          }
+        } else {
+          return Center(
+            child: CircularProgressIndicator(
+              color: Theme.of(context).primaryColor,
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  noGroupWidget(){
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 25),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          GestureDetector(
+              onTap: (){
+                popUpDialog(context);
+              },
+              child: Icon(
+                Icons.add_circle,
+                color: Colors.grey[700],
+                size: 75,)),
+          const SizedBox(height: 20,),
+          const Text("You are not a member of any forum/group, Tap on the add button to create or search existing groups",
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
 }
